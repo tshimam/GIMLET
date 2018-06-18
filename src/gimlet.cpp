@@ -1,5 +1,4 @@
 #include <RcppArmadillo.h>
-#include <Rcpp.h>
 #include <math.h> 
 
 using namespace arma;
@@ -101,7 +100,7 @@ arma::vec neikerCpp(const arma::mat X, const arma::rowvec mu, int r){
   }
   id = sort_index(tker);
   for(int i = 0; i < r; i++){
-    ker(id(i)) = 1;
+  	ker(id(i)) = 1;
   }
   return ker;
 }
@@ -109,31 +108,30 @@ arma::vec neikerCpp(const arma::mat X, const arma::rowvec mu, int r){
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
 Rcpp::List gimletCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
-		     const int r, const double delta, const int bootn, const int type){
+const int r, const double delta, const int nperm){
   int n = X.n_rows;
   int ln = round(n*delta);
-  int p = Y.n_cols;
   int q = Z.n_cols;
   double Zmin;
   double Zmax;
   double lambda;
-  double S;
-  arma::vec normz(n);
+  arma::vec S(1);
+  arma::vec nS(1);
+  arma::vec normZ(n);
   arma::vec dx = distCpp(X,1);
-  arma::vec dy;
-  arma::vec tmpC(2*r);
+  arma::vec dy = distCpp(Y,1);
   arma::vec dd(n);
   arma::vec ww(n);
-  arma::vec gp(p);
+  double gp;
   arma::uvec id(n);
   arma::mat nZ(n,q);
-  arma::mat M(2*r,q);
-  arma::mat W(n,2*r);
-  arma::mat C(2*r,p);
-  arma::mat ep(2*r,p);
+  arma::mat M(n,q);
+  arma::mat W(n,n);
+  arma::vec C(2*r);
+  arma::vec ep(2*r);
   arma::mat nullW(n,2*r);
-  arma::mat nullS(p,bootn,fill::zeros);
-  arma::cube nullC(2*r,p,bootn,fill::zeros);
+  arma::vec nullS(nperm,fill::zeros);
+  arma::mat nullC(2*r,nperm,fill::zeros);
   arma::vec nullCC(2*r);
   for(int i = 0; i < q; i++){
     Zmin = min(Z.col(i));
@@ -141,19 +139,13 @@ Rcpp::List gimletCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
     nZ.col(i) = (Z.col(i) - Zmin) / (Zmax - Zmin);
   }
   for(int i = 0; i < n; i++){
-    normz(i) = norm(nZ.row(i),1);
+    normZ(i) = norm(nZ.row(i),1);
   }
-  id = sort_index(normz);
-  int count = 0;
-  for(int i = 0; i < r; i++){
-    M.row(count) = nZ.row(id(i));
-    count++;
+  id = sort_index(normZ);
+  for(int i = 0; i < n; i++){
+    M.row(i) = nZ.row(id(i));
   }
-  for(int i = n - r; i < n; i++){
-    M.row(count) = nZ.row(id(i));
-    count++;
-  }
-  for(int i = 0; i < 2*r; i++){
+  for(int i = 0; i < n; i++){
     for(int j = 0; j < n; j++){
       dd(j) = norm(nZ.row(j) - M.row(i), 1);
     }
@@ -162,44 +154,56 @@ Rcpp::List gimletCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
     if(lambda == 0){
       lambda = 1e-3;
     }
-    if(type == 1){
-      ww = gaukerCpp(nZ, M.row(i), lambda);
-    } else {
-      ww = neikerCpp(nZ, M.row(i), ln);
-    }
+    ww = gaukerCpp(nZ, M.row(i), lambda);
     W.col(i) = ww / sum(ww);
   }
   ep.zeros();
-  gp.zeros();
-  for(int i = 0; i < p; i++){
-    dy = distCpp(Y.col(i),1);
-    tmpC.zeros();
-    for(int j = 0; j < 2*r; j++){
-      tmpC(j) = ldcorCpp(dx,dy,W.col(j));
+  gp = 0;
+  C.zeros();
+  int count = 0;
+  for(int j = 0; j < r; j++){
+    C(count) = ldcorCpp(dx,dy,W.col(j));
+    count ++;
+  }
+  for(int j = n - r; j < n; j++){
+    C(count) = ldcorCpp(dx,dy,W.col(j));
+    count ++;
+  }
+  S(0) = mean(C.subvec(r,2*r-1)) - mean(C.subvec(0,r-1));
+  S = abs(S);
+  for(int j = 0; j < nperm; j++){
+    nullW = shuffle(W,0);
+    count = 0;
+    for(int k = 0; k < r; k++){
+      nullC(count,j) = ldcorCpp(dx,dy,nullW.col(k));
+      nullCC(count) = nullC(count,j);
+      if(C(count) < nullC(count,j)){
+        ep(count)++;
+      }
+      count ++;
     }
-    S = mean(tmpC.subvec(r,2*r-1)) - mean(tmpC.subvec(0,r-1));
-    C.col(i) = tmpC;
-    for(int j = 0; j < bootn; j++){
-      nullW = shuffle(W,0);
-      for(int k = 0; k < 2*r; k++){
-        nullC(k,i,j) = ldcorCpp(dx,dy,nullW.col(k));
-        nullCC(k) = nullC(k,i,j);
-        if(C(k,i) < nullC(k,i,j)){
-          ep(k,i)++;
-        }
+    for(int k = n - r; k < n; k++){
+      nullC(count,j) = ldcorCpp(dx,dy,nullW.col(k));
+      nullCC(count) = nullC(count,j);
+      if(C(count) < nullC(count,j)){
+        ep(count)++;
       }
-      nullS(i,j) = mean(nullCC.subvec(r,2*r-1)) - mean(nullCC.subvec(0,r-1));
-      if(S < nullS(i,j)){
-        gp(i)++;
-      }
+      count ++;
+    }
+    nS(0) = mean(nullCC.subvec(r,2*r-1)) - mean(nullCC.subvec(0,r-1));
+    nS = abs(nS);
+    nullS(j) = nS(0);
+    if(S(0) < nS(0)){
+      gp++;
     }
   }
-  ep = (ep + 1) / (bootn + 1);
-  gp = (gp + 1) / (bootn + 1);
+  ep = (ep + 1) / (nperm + 1);
+  gp = (gp + 1) / (nperm + 1);
   return List::create(Named("modulator") = M,
-		      Named("ldcor") = C,
-		      Named("global.score") = S,
-		      Named("each.p.value") = ep,
+                      Named("weights") = W,
+                      Named("ldcor") = C,
+                      Named("global.score") = S,
+                      Named("each.p.value") = ep,
                       Named("global.p.value") = gp,
                       Named("null.global.score") = nullS,
                       Named("null.each.ldcor") = nullC);
@@ -207,8 +211,78 @@ Rcpp::List gimletCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::export]]
+Rcpp::List gimletCpp2(const arma::mat X, const arma::mat Y, const arma::rowvec Z, const int nperm){
+  int n = X.n_rows;
+  double sumZ1;
+  double sumZ0;
+  arma::vec S(1);
+  arma::vec nS(1);
+  arma::vec dx = distCpp(X,1);
+  arma::vec dy = distCpp(Y,1);
+  arma::vec tmpC(2);
+  arma::vec dd(n);
+  arma::vec ww(n);
+  arma::vec gp(1);
+  arma::mat W(n,2);
+  arma::vec C(2);
+  arma::vec ep(2);
+  arma::mat nullW(n,2);
+  arma::vec nullS(nperm,fill::zeros);
+  arma::mat nullC(2,nperm,fill::zeros);
+  arma::vec nullCC(2);
+  ep.zeros();
+  gp.zeros();
+  
+  sumZ1 = sum(Z==1);
+  sumZ0 = sum(Z==0);
+  for(int i = 0; i < n; i++){
+    W(i,0) = 0;
+    W(i,1) = 0;
+    if(Z(i) == 1){
+      W(i,1) = 1/sumZ1;
+    } else if(Z(i) == 0){
+      W(i,0) = 1/sumZ0;
+    }
+  }
+  tmpC(0) = ldcorCpp(dx,dy,W.col(0));
+  tmpC(1) = ldcorCpp(dx,dy,W.col(1));
+  S(0) = tmpC(1) - tmpC(0);
+  S = abs(S);
+  C = tmpC;
+  for(int j = 0; j < nperm; j++){
+    nullW = shuffle(W,0);
+    nullC(0,j) = ldcorCpp(dx,dy,nullW.col(0));
+    nullCC(0) = nullC(0,j);
+    if(C(0) < nullC(0,j)){
+      ep(0)++;
+    }
+    nullC(1,j) = ldcorCpp(dx,dy,nullW.col(1));
+    nullCC(1) = nullC(1,j);
+    if(C(1) < nullC(1,j)){
+      ep(1)++;
+    }
+    nS(0) = nullCC(1) - nullCC(0);
+    nS = abs(nS);
+    nullS(j) = nS(0);
+    if(S(0) < nS(0)){
+      gp(0)++;
+    }
+  }
+  ep = (ep + 1) / (nperm + 1);
+  gp = (gp + 1) / (nperm + 1);
+  return List::create(Named("weights") = W,
+  	                Named("ldcor") = C,
+  	                Named("global.score") = S,
+		  Named("each.p.value") = ep,
+                              Named("global.p.value") = gp,
+                              Named("null.global.score") = nullS,
+                              Named("null.each.ldcor") = nullC);
+}
+
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::export]]
 Rcpp::List ldcorAllCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
-		       const arma::mat M, const double delta, const int bootn, const int type){
+const arma::mat M, const double delta, const int nperm){
   int n = X.n_rows;
   int ln = round(n*delta);
   int p = Y.n_cols;
@@ -230,7 +304,7 @@ Rcpp::List ldcorAllCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
   arma::mat C(r,p);
   arma::mat ep(r,p);
   arma::mat nullW(n,r);
-  arma::cube nullC(r,p,bootn,fill::zeros);
+  arma::cube nullC(r,p,nperm,fill::zeros);
   arma::vec nullCC(r);
   for(int i = 0; i < q; i++){
     Zmin = min(Z.col(i));
@@ -246,11 +320,7 @@ Rcpp::List ldcorAllCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
     if(lambda == 0){
       lambda = 1e-3;
     }
-    if(type == 1){
-      ww = gaukerCpp(nZ, M.row(i), lambda);
-    } else {
-      ww = neikerCpp(nZ, M.row(i), ln);
-    }
+    ww = gaukerCpp(nZ, M.row(i), lambda);
     W.col(i) = ww / sum(ww);
   }
   ep.zeros();
@@ -261,7 +331,7 @@ Rcpp::List ldcorAllCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
       tmpC(j) = ldcorCpp(dx,dy,W.col(j));
     }
     C.col(i) = tmpC;
-    for(int j = 0; j < bootn; j++){
+    for(int j = 0; j < nperm; j++){
       nullW = shuffle(W,0);
       for(int k = 0; k < r; k++){
         nullC(k,i,j) = ldcorCpp(dx,dy,nullW.col(k));
@@ -272,8 +342,8 @@ Rcpp::List ldcorAllCpp(const arma::mat X, const arma::mat Y, const arma::mat Z,
       }
     }
   }
-  ep = (ep + 1) / (bootn + 1);
+  ep = (ep + 1) / (nperm + 1);
   return List::create(Named("ldcor") = C,
-		      Named("each.p.value") = ep,
+                      Named("each.p.value") = ep,
                       Named("null.each.ldcor") = nullC);
 }
