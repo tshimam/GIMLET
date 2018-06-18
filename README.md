@@ -26,7 +26,7 @@ install_github("tshimam/GIMLET")
 ## General overview
 
 We propose a novel method, genome-wide identification of modulators using local energy statistical test (GIMLET), to identify biological modulators that contribute to transcription factor activities.
-GIMLET takes data matrix (for example, expression, copy number, and mutation data matrix for n samples) of regulators, their target genes, and modulators as inputs, and calculates a new dependence measure, called local distance correlation to compare the difference of distance correlation at low and high values of given modulators. Local distance correlation is used for modeling the relationships between regulators and their target genes at the fixed point of modulators. GIMLET calculates a statistical significance whether local distance correlation varies with modulators using a permutation-based approach.
+GIMLET takes data matrix (for example, expression, copy number, and mutation data matrix for n samples) of regulators, their target genes, and modulators as inputs, and calculates a new dependence measure, called local distance correlation, to compare the difference of distance correlation at low and high values of given modulators. Local distance correlation is used for modeling the relationships between regulators and their target genes at the fixed point of modulators. GIMLET calculates a statistical significance whether local distance correlation varies with modulators using a permutation-based approach.
 
 ## An example of synthetic data
 
