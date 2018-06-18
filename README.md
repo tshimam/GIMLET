@@ -46,4 +46,4 @@ obj$global.p.value
 ```
 
 ## Reference
-Teppei Shimamura, Yusuke Matsui, Taisuke Kajino, Satoshi Ito, Takashi Takahashi, and Satoru Miyano, GIMLET: Identifying Biological Modulators in Context-Specific Gene Regulation Using Local Energy Statistics, Accepted in CIBB 2007. The extended version will be published in Lecture Notes in Bioinformatics.
+Teppei Shimamura, Yusuke Matsui, Taisuke Kajino, Satoshi Ito, Takashi Takahashi, and Satoru Miyano, GIMLET: Identifying Biological Modulators in Context-Specific Gene Regulation Using Local Energy Statistics, Accepted in CIBB 2007. The post-proceedings version of CIBB 2017 paper will be published in Lecture Notes in Bioinformatics.
