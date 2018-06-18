@@ -1,3 +1,4 @@
-useDynLib(GIMLET)
+useDynLib(GIMLET, .registration=TRUE)
 exportPattern("^[[:alpha:]]+")
 importFrom(Rcpp, evalCpp)
+
