@@ -30,7 +30,7 @@ GIMLET takes data matrix (for example, expression, copy number, and mutation dat
 
 ## An example of synthetic data
 
-Let denote X, Y, and Z by a regulator, its target gene, and a modulator. We show an example of synthetic data of (X,Y,Z) generated using the endogenous switching regression model where the relationship between X and Y is linear and varies with modulators. For details, see the Section 3 in the manuscript.
+Let denote X, Y, and Z by a regulator, its target gene, and a modulator. We show an example of synthetic data of (X,Y,Z) generated using the endogenous switching regression model where the relationship between X and Y is linear and varies with Z. For details, see the Section 3 in the manuscript.
 
 ```
 library("GIMLET")
