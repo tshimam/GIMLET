@@ -58,7 +58,7 @@ for(k in 1:simn){
   cat(k,"/",simn,"\n")
   set.seed(k)
 
-  if(sim.typ==5|sim.typ==7){
+  if(fun.typ==5|fun.typ==7){
     r1 <- 1/6
     r2 <- 1
   } else {
