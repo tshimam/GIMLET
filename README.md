@@ -30,11 +30,11 @@ GIMLET takes data matrix (for example, expression, copy number, and mutation dat
 
 ## Inputs of GIMLET
 
-1. 
-2.
-3.
-4.
-5.
+l. X: data matrix of regulators
+l. Y: data matrix of targets
+l. Z: data matrix of modulators
+l. r: number of samples
+l. B: number of permulations
 
 ## An example of synthetic data
 
