@@ -35,13 +35,41 @@ Let denote X, Y, and Z by a regulator, its target gene, and a modulator. We show
 ```
 library("GIMLET")
 
-n <- 200
-junk <- sim1(n,type="linear")
-X <- junk$x
-Y <- junk$y
-Z <- junk$z
-obj <- gimlet(X,Y,Z)
-obj$global.p.value
+simn <- 100 # number of simulations
+n <- 200 # number of samples
+sim.typ <- 1 # 1:model I, 2:model II, 3: model III in Section 3
+fun.typ <- 1 # 1:line, 2: quadratic, 3:cubic, 4:sine period 1/2, 5:sine period 1/8, 6:x^1/4, 7: circle, 8:step
+pval_thres <- 0.05 # threshold of significance
+
+pval <- rep(1,simn)
+
+for(k in 1:simn){
+
+  cat(k,"/",simn,"\n")
+  set.seed(k)
+
+  if(sim.typ==5|sim.typ==7){
+    r1 <- 1/6
+    r2 <- 1
+  } else {
+    r1 <- 0.5
+    r2 <- 3
+  }
+
+  data <- sim(n=n,sim.typ=sim.typ,fun.typ=fun.typ,model=1,r1=r1,r2=r2)
+  x <- data$x
+  y <- data$y
+  z <- data$z
+  if(is.vector(x)) x <- matrix(x,ncol=1)
+  if(is.vector(y)) y <- matrix(y,ncol=1)
+  if(is.vector(z)) z <- matrix(z,ncol=1)
+
+  gimlet.obj <- gimlet(x,y,z,1,0.25,1000)
+  pval[k] <- gimlet.obj$global.p.value
+
+}
+
+mean(pval <= pval_thres)
 
 ```
 
