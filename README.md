@@ -5,7 +5,7 @@ R package for the identification of biological modulators in context-specific ge
 
 R(>=3.3.2)
 
-Rcpp, RcppArmadillo
+Rcpp, RcppArmadillo, infotheo
 
 <strong>Authors:</strong>
 
