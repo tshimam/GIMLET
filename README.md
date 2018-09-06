@@ -47,7 +47,7 @@ library("GIMLET")
 
 simn <- 100 # number of simulations
 n <- 200 # number of samples
-sim.typ <- 1 # 1:model I, 2:model II, 3: model III in Section 3
+sim.typ <- 1 # 1:M_1, 2:M_2, 3:M_3 in Section 3
 fun.typ <- 1 # 1:line, 2: quadratic, 3:cubic, 4:sine period 1/2, 5:sine period 1/8, 6:x^1/4, 7: circle, 8:step
 pval_thres <- 0.05 # threshold of significance
 
