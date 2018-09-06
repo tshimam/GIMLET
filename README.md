@@ -35,7 +35,7 @@ GIMLET takes data matrix (for example, expression, copy number, and mutation dat
 - **Z**: a data matrix of modulators
 - **r**: a number of the upper and lower points of Z, that is, |U_Z| and |L_Z| in equation (4). The default value is 1.
 - **delta**: a tuning parameter that indicates the proportion of neighbors in the Euclidean distance of Z. The default value is 0.3.
-- **nperm**: number of permutations for calculating the p-value. The default value is 1000.
+- **nperm**: a number of permutations for calculating the p-value. The default value is 1000.
 - **type**: a character string indicating what type of Y is used. One of "continuous"(default) or "binary" can be abbreviated.
 
 ## An example of synthetic data
