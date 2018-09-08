@@ -26,7 +26,7 @@ install_github("tshimam/GIMLET")
 ## General overview
 
 We propose a novel method, genome-wide identification of modulators using local energy statistical test (GIMLET), to identify biological modulators that contribute to transcription factor activities.
-GIMLET takes data matrix (for example, expression, copy number, and mutation data matrix for n samples) of regulators, their target genes, and modulators as inputs, and calculates a new dependence measure, called local distance correlation, to compare the difference of distance correlation at low and high values of given modulators. Local distance correlation is used for modeling the relationships between regulators and their target genes at the fixed point of modulators. GIMLET calculates a statistical significance whether local distance correlation varies with modulators using a permutation-based approach.
+GIMLET takes data matrices (for example, expression, copy number, and mutation data matrix for n samples) of regulators, their target genes, and modulators as inputs, and calculates a new dependence measure, called local distance correlation, to compare the difference of distance correlation at low and high values of given modulators. Local distance correlation is used for modeling the relationships between regulators and their target genes at the fixed point of modulators. GIMLET calculates a statistical significance whether local distance correlation varies with modulators using a permutation-based approach.
 
 ## Inputs of GIMLET
 
@@ -36,7 +36,7 @@ GIMLET takes data matrix (for example, expression, copy number, and mutation dat
 - **r**: a number of the upper and lower points of Z, that is, |U_Z| and |L_Z| in equation (4). The default value is 1.
 - **delta**: a tuning parameter that indicates the proportion of neighbors in the Euclidean distance of Z. The default value is 0.3.
 - **nperm**: a number of permutations for calculating the p-value. The default value is 1000.
-- **type**: a character string indicating what type of Y is used. One of "continuous"(default) or "binary" can be abbreviated.
+- **type**: a character string indicating what type of Z is used. One of "continuous"(default) or "binary" can be abbreviated.
 
 ## An example of synthetic data
 
